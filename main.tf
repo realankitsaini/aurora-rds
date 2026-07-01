@@ -9,8 +9,9 @@ resource "aws_vpc" "rds_vpc" {
   enable_dns_support   = true
 
   tags = {
-    Name        = "${var.environment}-rds-vpc"
-    Environment = var.environment
+    Name        = "${terraform.workspace}-rds-vpc" 
+    
+    Environment = lookup(var.environment_names, terraform.workspace, "development")
   }
 }
 
@@ -21,8 +22,8 @@ resource "aws_subnet" "subnet_az1" {
   availability_zone = "${var.aws_region}a"
 
   tags = {
-    Name        = "${var.environment}-private-db-az1"
-    Environment = var.environment
+    Name        = "${terraform.workspace}-private-db-az1"
+    Environment = lookup(var.environment_names, terraform.workspace, "development")
   }
 }
 
@@ -33,18 +34,18 @@ resource "aws_subnet" "subnet_az2" {
   availability_zone = "${var.aws_region}b"
 
   tags = {
-    Name        = "${var.environment}-private-db-az2"
-    Environment = var.environment
+    Name        = "${terraform.workspace}-private-db-az2"
+    Environment = lookup(var.environment_names, terraform.workspace, "development")
   }
 }
 
-# 4. Strict Security Group Layer
+# 4. Strictly-Scoped Security Group Layer
 resource "aws_security_group" "aurora_sg" {
-  name        = "${var.environment}-aurora-sg"
-  description = "Controls ingress and egress connection rules to the Aurora cluster"
+  name        = "${terraform.workspace}-aurora-sg"
+  description = "Controls connection rules to the Aurora cluster"
   vpc_id      = aws_vpc.rds_vpc.id
 
-  # Ingress rule: Allow MySQL standard traffic (3306) internally within the VPC range
+  # Ingress rule: Allow MySQL traffic (3306) internally within the VPC range
   ingress {
     from_port   = 3306
     to_port     = 3306
@@ -52,16 +53,16 @@ resource "aws_security_group" "aurora_sg" {
     cidr_blocks = [aws_vpc.rds_vpc.cidr_block]
   }
 
-  # Egress rule: Allow outgoing lookups or connections freely
+  # Egress rule: Allow outgoing traffic
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name        = "${var.environment}-aurora-security-group"
-    Environment = var.environment
+    Name        = "${terraform.workspace}-aurora-security-group"
+    Environment = lookup(var.environment_names, terraform.workspace, "development")
   }
 }
