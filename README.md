@@ -1,5 +1,5 @@
-Markdown# 🚀 Multi-Environment Amazon Aurora RDS with Automated CI/CD
-
+**🚀 Multi-Environment Amazon Aurora RDS with Automated CI/CD
+**
 This repository contains a production-ready Infrastructure as Code (IaC) blueprint using **Terraform** to deploy a highly available, securely monitored **Amazon Aurora MySQL Cluster** with a dedicated read replica. 
 
 The project is fully refactored to use **Terraform Workspaces** for multi-environment isolation (`dev`, `staging`, `prod`) and includes a **GitHub Actions CI/CD pipeline** to automate deployments completely hands-free based on Git branch pushes.
