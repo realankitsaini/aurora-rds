@@ -4,22 +4,16 @@ variable "aws_region" {
   description = "The target AWS region for deployment"
 }
 
-variable "environment" {
-  type        = string
-  default     = "production"
-  description = "Tag to identify the environment classification"
-}
-
 variable "db_cluster_identifier" {
   type        = string
   default     = "aurora-mysql-cluster"
-  description = "The unique identifier naming your DB cluster"
+  description = "The base unique identifier naming your DB cluster"
 }
 
 variable "db_name" {
   type        = string
   default     = "appdb"
-  description = "The initial application database name created on startup"
+  description = "The initial database name created on startup"
 }
 
 variable "db_master_username" {
@@ -30,15 +24,28 @@ variable "db_master_username" {
 
 variable "db_master_password" {
   type        = string
-  default     = "P@sswordSecure2026!" # Replace this with a secure password or dynamic input variable
-  sensitive   = true
-  description = "The database master administrative security password"
+  sensitive   = true # Prevent password exposure in plan/apply logs
+  description = "The database master security password (Injected at runtime via secrets/environment variables)"
 }
 
-variable "db_instance_class" {
-  type        = string
-  default     = "db.r6g.large"
-  description = "The compute size class applied to both writer and reader cluster instances"
+# Map defining the hardware profile for each environment workspace
+variable "db_instance_classes" {
+  type = map(string)
+  default = {
+    dev     = "db.t4g.medium"  # Cost-efficient for sandbox testing
+    staging = "db.r6g.large"   # Match production architectural layout
+    prod    = "db.r6g.xlarge"  # High performance scale sizing
+  }
+}
+
+# Map defining tag identification names per workspace
+variable "environment_names" {
+  type = map(string)
+  default = {
+    dev     = "development"
+    staging = "staging"
+    prod    = "production"
+  }
 }
 
 variable "cpu_alarm_threshold" {
@@ -50,5 +57,5 @@ variable "cpu_alarm_threshold" {
 variable "cpu_alarm_period" {
   type        = number
   default     = 300 # 5 minutes
-  description = "The period in seconds over which the metric statistic is applied"
+  description = "The period in seconds over which the metric statistic is evaluated"
 }
